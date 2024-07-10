@@ -1,6 +1,12 @@
 from codecs import encode
 from codecs import decode
 from socket import *
+import argparse
+
+parser = argparse.ArgumentParser(description='args')
+parser.add_argument('--protocol', type=str, default='-t')
+parser.add_argument('--ip', type=str, default='127.0.0.1')
+args = parser.parse_args()
 
 def UDP_create_socket():
     return socket(AF_INET, SOCK_DGRAM)
@@ -20,12 +26,23 @@ def TCP_exchange_message(socket: socket, ip, port, message):
     modifiedMessage = clientSocket.recv(1024)
     return modifiedMessage
 
-serverName = '127.0.0.1'
-serverPort = 12000
 
-clientSocket = TCP_create_socket(serverName, serverPort)
+
+
+serverPort = 12000
+serverName = args.ip
+
+if (args.protocol == '-t'):
+    clientSocket = TCP_create_socket(serverName, serverPort)
+else:
+    clientSocket = UDP_create_socket(serverName, serverPort)
+
 message = input('Input lowercase sentence:')
-modifiedMessage = TCP_exchange_message(clientSocket, serverName, serverPort, message)
+
+if (args.protocol == '-t'):
+    modifiedMessage = TCP_exchange_message(clientSocket, serverName, serverPort, message)
+else:
+    modifiedMessage = UDP_exchange_message(clientSocket, serverName, serverPort, message)
 
 print(decode(modifiedMessage))
 

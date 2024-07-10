@@ -1,4 +1,8 @@
 from socket import *
+import argparse
+
+parser = argparse.ArgumentParser(description='args')
+args = parser.parse_args()
 
 def UDP_create_server_socket(port):
     serverSocket = socket(AF_INET, SOCK_DGRAM)
