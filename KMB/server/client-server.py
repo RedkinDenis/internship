@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='args')
 parser.add_argument('--mode', type=str, choices={'-s', '-c'}, default='none')
 parser.add_argument('--protocol', type=str, default='-t')
 parser.add_argument('--ip', type=str, default='127.0.0.1')
-parser.add_argument('--log', type=str, default='none')
+parser.add_argument('-f', type=str, default='none')
 args = parser.parse_args()
 
 
@@ -22,14 +22,16 @@ def client_TCP_create_socket(ip, port):
     clientSocket.connect((ip, port))
     return clientSocket
 
-def client_UDP_exchange_message(socket: socket, ip, port):
+def client_UDP_exchange_message(socket: socket, ip, port, log_file):  
     socket.sendto(encode('message'), (ip, port))
+    log('The message has been sent\n')
     modifiedMessage, serverAddress = socket.recvfrom(2048)
+    log('The message has been received\n')
     return modifiedMessage
 
-def client_TCP_exchange_message(socket: socket, ip, port):
-    # clientSocket.send(encode('message'))
+def client_TCP_exchange_message(socket: socket, ip, port, log_file):
     modifiedMessage = clientSocket.recv(1024)
+    log('The message has been received\n')
     return modifiedMessage
 
 
@@ -47,41 +49,49 @@ def server_TCP_create_server_socket(port):
 
 def server_TCP_exchange_message(socket: socket, port):
     connectionSocket, addr = socket.accept()
-    # sentence = connectionSocket.recv(1024)
-    # capitalizedSentence = sentence.upper()
-    # print(addr[0])
     connectionSocket.send(encode(addr[0] + ' ' + str(addr[1])))
     connectionSocket.close()
 
 def server_UDP_exchange_message(socket: socket, port):
     message, clientAddress = socket.recvfrom(2048)
-    # modifiedMessage = message.upper()
     serverSocket.sendto(clientAddress, clientAddress)
-
-
 
 serverPort = 12000
 
 # client
 
 if (args.mode == '-c'):
+    
+    if (args.f != 'none'):
+        log_file = open(args.f + '.txt', 'w')
+    else:
+        log_file = 0
+
+    log = lambda str: print(str) if args.f == 'none' else log_file.write(str)
 
     serverName = args.ip
 
     if (args.protocol == '-t'):
+        log('protocol - TCP ')
         clientSocket = client_TCP_create_socket(serverName, serverPort)
     else:
+        log('protocol - UDP ')
         clientSocket = client_UDP_create_socket(serverName, serverPort)
 
-    if (args.protocol == '-t'):
-        modifiedMessage = client_TCP_exchange_message(clientSocket, serverName, serverPort)
-    else:
-        modifiedMessage = client_UDP_exchange_message(clientSocket, serverName, serverPort)
+    log('server adress - ' + args.ip + ', port - ' + str(serverPort) + '\n')
 
-    print(decode(modifiedMessage))
+    log('socket has been created\n')
+
+    if (args.protocol == '-t'):
+        modifiedMessage = client_TCP_exchange_message(clientSocket, serverName, serverPort, log_file)
+    else:
+        modifiedMessage = client_UDP_exchange_message(clientSocket, serverName, serverPort, log_file)
+
+    log('result - ' + decode(modifiedMessage))
 
     clientSocket.close()
 
+    log('\nsocket has been closed')
 
 
 # server
@@ -93,7 +103,7 @@ if (args.mode == '-s'):
     else:
         serverSocket = server_UDP_create_server_socket(serverPort)
 
-    print("The server is ready to receive")
+    print('The server is ready to receive')
 
     while 1:
         if (args.protocol == '-t'):
