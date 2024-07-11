@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='args')
 parser.add_argument('--mode', type=str, choices={'-s', '-c'}, default='none')
 parser.add_argument('--protocol', type=str, default='-t')
 parser.add_argument('--ip', type=str, default='127.0.0.1')
+parser.add_argument('--log', type=str, default='none')
 args = parser.parse_args()
 
 
@@ -16,18 +17,18 @@ args = parser.parse_args()
 def client_UDP_create_socket():
     return socket(AF_INET, SOCK_DGRAM)
 
-def client_UDP_exchange_message(socket: socket, ip, port, message):
-    socket.sendto(encode(message), (ip, port))
-    modifiedMessage, serverAddress = socket.recvfrom(2048)
-    return modifiedMessage
-
 def client_TCP_create_socket(ip, port):
     clientSocket = socket(AF_INET, SOCK_STREAM)
     clientSocket.connect((ip, port))
     return clientSocket
 
-def client_TCP_exchange_message(socket: socket, ip, port, message):
-    clientSocket.send(encode(message))
+def client_UDP_exchange_message(socket: socket, ip, port):
+    socket.sendto(encode('message'), (ip, port))
+    modifiedMessage, serverAddress = socket.recvfrom(2048)
+    return modifiedMessage
+
+def client_TCP_exchange_message(socket: socket, ip, port):
+    # clientSocket.send(encode('message'))
     modifiedMessage = clientSocket.recv(1024)
     return modifiedMessage
 
@@ -46,15 +47,16 @@ def server_TCP_create_server_socket(port):
 
 def server_TCP_exchange_message(socket: socket, port):
     connectionSocket, addr = socket.accept()
-    sentence = connectionSocket.recv(1024)
-    capitalizedSentence = sentence.upper()
-    connectionSocket.send(capitalizedSentence)
+    # sentence = connectionSocket.recv(1024)
+    # capitalizedSentence = sentence.upper()
+    # print(addr[0])
+    connectionSocket.send(encode(addr[0] + ' ' + str(addr[1])))
     connectionSocket.close()
 
 def server_UDP_exchange_message(socket: socket, port):
     message, clientAddress = socket.recvfrom(2048)
-    modifiedMessage = message.upper()
-    serverSocket.sendto(modifiedMessage, clientAddress)
+    # modifiedMessage = message.upper()
+    serverSocket.sendto(clientAddress, clientAddress)
 
 
 
@@ -71,12 +73,10 @@ if (args.mode == '-c'):
     else:
         clientSocket = client_UDP_create_socket(serverName, serverPort)
 
-    message = input('Input lowercase sentence:')
-
     if (args.protocol == '-t'):
-        modifiedMessage = client_TCP_exchange_message(clientSocket, serverName, serverPort, message)
+        modifiedMessage = client_TCP_exchange_message(clientSocket, serverName, serverPort)
     else:
-        modifiedMessage = client_UDP_exchange_message(clientSocket, serverName, serverPort, message)
+        modifiedMessage = client_UDP_exchange_message(clientSocket, serverName, serverPort)
 
     print(decode(modifiedMessage))
 
