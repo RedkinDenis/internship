@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='args')
 parser.add_argument('--mode', type=str, choices={'-s', '-c'}, default='none')
-parser.add_argument('--protocol', type=str, default='-t')
+parser.add_argument('--protocol', type=str, default='-u')
 parser.add_argument('--ip', type=str, default='127.0.0.1')
 parser.add_argument('-f', type=str, default='none')
 args = parser.parse_args()
@@ -54,7 +54,7 @@ def server_TCP_exchange_message(socket: socket, port):
 
 def server_UDP_exchange_message(socket: socket, port):
     message, clientAddress = socket.recvfrom(2048)
-    serverSocket.sendto(clientAddress, clientAddress)
+    serverSocket.sendto(encode(clientAddress[0] + ' ' + str(clientAddress[1])), clientAddress)
 
 serverPort = 12000
 
@@ -76,7 +76,7 @@ if (args.mode == '-c'):
         clientSocket = client_TCP_create_socket(serverName, serverPort)
     else:
         log('protocol - UDP ')
-        clientSocket = client_UDP_create_socket(serverName, serverPort)
+        clientSocket = client_UDP_create_socket()
 
     log('server adress - ' + args.ip + ', port - ' + str(serverPort) + '\n')
 
