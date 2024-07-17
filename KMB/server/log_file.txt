@@ -1,5 +1,0 @@
-protocol - TCP server adress - 127.0.0.1, port - 12000
-socket has been created
-The message has been received
-result - 127.0.0.1 62432
-socket has been closed

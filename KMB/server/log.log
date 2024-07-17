@@ -1,0 +1,6 @@
+client_TCP 2024-07-17 16:14:20,979 INFO protocol - TCP 
+client_TCP_create_socket 2024-07-17 16:14:20,980 INFO server adress - 127.0.0.1, port - 12000
+client_TCP_create_socket 2024-07-17 16:14:20,981 INFO socket has been created
+client_TCP_exchange_message 2024-07-17 16:14:20,981 INFO The message has been received
+client_TCP 2024-07-17 16:14:20,981 INFO result - 127.0.0.1 61290
+client_TCP 2024-07-17 16:14:20,981 INFO socket has been closed
