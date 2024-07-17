@@ -26,27 +26,27 @@ def parse_args():
 
 def client_UDP_create_socket(serverName, serverPort):
     socket = sk.socket(sk.AF_INET, sk.SOCK_DGRAM)
-    py_logger.info('server adress - ' + serverName + ', port - ' + str(serverPort) + '')
-    py_logger.info('socket has been created')
+    logger.info('server adress - ' + serverName + ', port - ' + str(serverPort) + '')
+    logger.info('socket has been created')
     return socket
 
 def client_TCP_create_socket(ip, port):
     clientSocket = sk.socket(sk.AF_INET, sk.SOCK_STREAM)
     clientSocket.connect((ip, port))
-    py_logger.info('server adress - ' + ip + ', port - ' + str(port) + '')
-    py_logger.info('socket has been created')
+    logger.info('server adress - ' + ip + ', port - ' + str(port) + '')
+    logger.info('socket has been created')
     return clientSocket
 
 def client_UDP_exchange_message(socket: sk.socket, ip, port):  
     socket.sendto(encode('message'), (ip, port))
-    py_logger.info('The message has been sent')
+    logger.info('The message has been sent')
     modifiedMessage, _ = socket.recvfrom(2048)
-    py_logger.info('The message has been received')
+    logger.info('The message has been received')
     return modifiedMessage
 
 def client_TCP_exchange_message(socket: sk.socket, ip, port):
     modifiedMessage = socket.recv(1024)
-    py_logger.info('The message has been received')
+    logger.info('The message has been received')
     return modifiedMessage
 
 def server_UDP_create_server_socket(addres, port):
@@ -70,28 +70,28 @@ def server_UDP_exchange_message(socket: sk.socket, port):
     socket.sendto(encode(clientAddress[0] + ' ' + str(clientAddress[1])), clientAddress)
 
 def client_TCP(serverName, serverPort):
-    py_logger.info('protocol - TCP ')
+    logger.info('protocol - TCP ')
     clientSocket = client_TCP_create_socket(serverName, serverPort)
 
     modifiedMessage = client_TCP_exchange_message(clientSocket, serverName, serverPort)
    
-    py_logger.info('result - ' + decode(modifiedMessage))
+    logger.info('result - ' + decode(modifiedMessage))
 
     clientSocket.close()
 
-    py_logger.info('socket has been closed')
+    logger.info('socket has been closed')
 
 def client_UDP(serverName, serverPort):
-    py_logger.info('protocol - UDP ')
-    clientSocket = client_UDP_create_socket(py_logger)
+    logger.info('protocol - UDP ')
+    clientSocket = client_UDP_create_socket(logger)
 
     modifiedMessage = client_UDP_exchange_message(clientSocket, serverName, serverPort)
 
-    py_logger.info('result - ' + decode(modifiedMessage))
+    logger.info('result - ' + decode(modifiedMessage))
 
     clientSocket.close()
 
-    py_logger.info('socket has been closed')
+    logger.info('socket has been closed')
 
 def server_TCP(serverName, serverPort):
     serverSocket = server_TCP_create_server_socket(serverName, serverPort)
@@ -120,21 +120,21 @@ def main():
 
     mode = {0b1010:server_TCP, 0b1001:server_UDP, 0b0110: client_TCP, 0b0101:client_UDP}
 
-    global py_logger
-    py_logger = logging.getLogger(__name__)
-    py_logger.setLevel(logging.INFO)
+    global logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
 
     if (args.f != 'none'):
-        py_handler = logging.FileHandler(f"{args.f}.log", mode='w')
+        handler = logging.FileHandler(f"{args.f}.log", mode='w')
     elif (args.o == True):
-        py_handler = logging.StreamHandler()
+        handler = logging.StreamHandler()
     else:
-        py_handler = logging.StreamHandler()    
+        handler = logging.StreamHandler()    
 
-    py_formatter = logging.Formatter("%(funcName)s %(asctime)s %(levelname)s %(message)s")
+    formatter = logging.Formatter("%(funcName)s %(asctime)s %(levelname)s %(message)s")
     
-    py_handler.setFormatter(py_formatter)
-    py_logger.addHandler(py_handler)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     mode[mask(args.s, args.c, args.t, args.u)](serverName, serverPort)
 
